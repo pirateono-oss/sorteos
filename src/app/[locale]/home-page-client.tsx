@@ -92,6 +92,13 @@ export default function SorteosPage() {
         ))}
       </div>
 
+      {/* Usage tips */}
+      <div className="mb-4 rounded-xl bg-gradient-to-r from-primary/5 to-secondary/30 p-3 text-xs text-muted-foreground">
+        {tab === 'wheel' && <span>💡 <strong>Cómo usar:</strong> Añade al menos 2 nombres, luego presiona <strong>¡Girar!</strong> para seleccionar un ganador al azar.</span>}
+        {tab === 'trivia' && <span>💡 <strong>Cómo usar:</strong> Elige la dificultad, lee la pregunta y toca <strong>Mostrar respuesta</strong> para verificar.</span>}
+        {tab === 'voice' && <span>💡 <strong>Cómo usar:</strong> Presiona <strong>Empezar a grabar</strong>, habla al micrófono, luego presiona Detener. Puedes reproducir o descargar el audio.</span>}
+        {tab === 'essay' && <span>💡 <strong>Cómo usar:</strong> Escribe un tema (ej: inteligencia artificial, cambio climático) y presiona <strong>Generar texto</strong>.</span>}
+      </div>
       {tab === 'wheel' && <WheelOfNames dict={dict} />}
       {tab === 'trivia' && <TriviaGen dict={dict} locale={locale} />}
       {tab === 'voice' && <VoiceRecorder dict={dict} />}
@@ -136,9 +143,6 @@ function WheelOfNames({ dict }: { dict: any }) {
     <div className="rounded-xl border border-border bg-card p-6">
       <div className="flex flex-col items-center gap-6">
         {/* Wheel */}
-        <div className="mb-2 rounded-xl bg-gradient-to-r from-primary/5 to-secondary/30 p-3 text-xs text-muted-foreground">
-          💡 <strong>Cómo usar:</strong> Añade al menos 2 nombres, luego presiona <strong>¡Girar!</strong> para seleccionar un ganador al azar.
-        </div>
         <div className="relative" style={{ width: 280, height: 280 }}>
           <div className="absolute inset-0 overflow-hidden rounded-full shadow-lg" style={{ transform: `rotate(${rotation}deg)`, transition: spinning ? 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)' : 'none' }}>
             {names.map((name, i) => {
@@ -221,10 +225,6 @@ function TriviaGen({ dict, locale }: { dict: any; locale: string }) {
       </div>
 
       {question && (
-        <>
-        <div className="mb-2 rounded-xl bg-gradient-to-r from-primary/5 to-secondary/30 p-3 text-xs text-muted-foreground">
-          💡 <strong>Cómo usar:</strong> Elige la dificultad, lee la pregunta y toca <strong>Mostrar respuesta</strong> para verificar.
-        </div>
         <div className="py-8">
           <p className="mb-2 text-xs text-muted-foreground uppercase tracking-wide">{dict.question}</p>
           <p className="mb-8 text-xl font-semibold leading-relaxed">{question.q}</p>
@@ -242,7 +242,6 @@ function TriviaGen({ dict, locale }: { dict: any; locale: string }) {
             </div>
           )}
         </div>
-        </>
       )}
     </div>
   );
@@ -277,9 +276,6 @@ function VoiceRecorder({ dict }: { dict: any }) {
 
   return (
     <div className="rounded-xl border border-border bg-card p-6 text-center">
-      <div className="mb-2 rounded-xl bg-gradient-to-r from-primary/5 to-secondary/30 p-3 text-xs text-muted-foreground">
-        💡 <strong>Cómo usar:</strong> Presiona <strong>Empezar a grabar</strong>, habla al micrófono, luego presiona Detener. Puedes reproducir o descargar el audio.
-      </div>
       <div className="mb-6 flex justify-center">
         <div className={`flex h-32 w-32 items-center justify-center rounded-full${recording ? 'bg-red-100 animate-pulse' : 'bg-secondary'}`}>
           <Mic className={`h-12 w-12 ${recording ? 'text-red-500' : 'text-muted-foreground'}`} />
@@ -340,9 +336,6 @@ function EssayTyper({ dict, locale }: { dict: any; locale: string }) {
   return (
     <div className="space-y-4">
       <div className="rounded-xl border border-border bg-card p-6">
-        <div className="mb-2 rounded-xl bg-gradient-to-r from-primary/5 to-secondary/30 p-3 text-xs text-muted-foreground">
-            💡 <strong>Cómo usar:</strong> Escribe un tema (ej: inteligencia artificial, cambio climático) y presiona <strong>Generar texto</strong> para obtener un párrafo automático.
-          </div>
         <div className="flex gap-3">
           <input value={topic} onChange={e => setTopic(e.target.value)} onKeyDown={e => e.key === 'Enter' && generate()}
             placeholder={dict.topic} className="flex-1 rounded-xl border border-border bg-background px-4 py-3 text-sm focus:border-primary focus:outline-none" />
