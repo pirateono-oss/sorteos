@@ -94,10 +94,10 @@ export default function SorteosPage() {
 
       {/* Usage tips */}
       <div className="mb-4 rounded-xl bg-gradient-to-r from-primary/5 to-secondary/30 p-3 text-xs text-muted-foreground">
-        {tab === 'wheel' && <span>💡 <strong>Cómo usar:</strong> Añade al menos 2 nombres, luego presiona <strong>¡Girar!</strong> para seleccionar un ganador al azar.</span>}
-        {tab === 'trivia' && <span>💡 <strong>Cómo usar:</strong> Elige la dificultad, lee la pregunta y toca <strong>Mostrar respuesta</strong> para verificar.</span>}
-        {tab === 'voice' && <span>💡 <strong>Cómo usar:</strong> Presiona <strong>Empezar a grabar</strong>, habla al micrófono, luego presiona Detener. Puedes reproducir o descargar el audio.</span>}
-        {tab === 'essay' && <span>💡 <strong>Cómo usar:</strong> Escribe un tema (ej: inteligencia artificial, cambio climático) y presiona <strong>Generar texto</strong>.</span>}
+        {tab === 'wheel' && <span>💡 <strong>{dict.enterName}:</strong> {locale === 'pt' ? 'Adicione pelo menos 2 nomes e pressione' : locale === 'en' ? 'Add at least 2 names and press' : 'Añade al menos 2 nombres, luego presiona'} <strong>{dict.spin}</strong> {locale === 'pt' ? 'para selecionar um vencedor.' : locale === 'en' ? 'to select a winner.' : 'para seleccionar un ganador al azar.'}</span>}
+        {tab === 'trivia' && <span>💡 <strong>{dict.category}:</strong> {locale === 'pt' ? 'Escolha a dificuldade, leia a pergunta e clique em' : locale === 'en' ? 'Choose difficulty, read the question and click' : 'Elige la dificultad, lee la pregunta y toca'} <strong>{dict.showAnswer}</strong> {locale === 'pt' ? 'para verificar.' : locale === 'en' ? 'to check.' : 'para verificar.'}</span>}
+        {tab === 'voice' && <span>💡 <strong>{dict.voiceRecorder}:</strong> {locale === 'pt' ? 'Pressione' : locale === 'en' ? 'Press' : 'Presiona'} <strong>{dict.startRecording}</strong>, {locale === 'pt' ? 'fale ao microfone e pressione' : locale === 'en' ? 'speak into the mic and press' : 'habla al micrófono, luego presiona'} {dict.stopRecording}. {locale === 'pt' ? 'Você pode ouvir ou baixar o áudio.' : locale === 'en' ? 'You can play or download the audio.' : 'Puedes reproducir o descargar el audio.'}</span>}
+        {tab === 'essay' && <span>💡 <strong>{dict.topic}:</strong> {locale === 'pt' ? 'Escreva um tema e pressione' : locale === 'en' ? 'Write a topic and press' : 'Escribe un tema y presiona'} <strong>{dict.generateText}</strong>.</span>}
       </div>
       {tab === 'wheel' && <WheelOfNames dict={dict} />}
       {tab === 'trivia' && <TriviaGen dict={dict} locale={locale} />}
