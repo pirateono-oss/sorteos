@@ -275,10 +275,10 @@ function VoiceRecorder({ dict }: { dict: any }) {
 
   return (
     <div className="rounded-xl border border-border bg-card p-6 text-center">
+      <div className="mb-2 rounded-xl bg-gradient-to-r from-primary/5 to-secondary/30 p-3 text-xs text-muted-foreground">
+        💡 <strong>Cómo usar:</strong> Presiona <strong>Empezar a grabar</strong>, habla al micrófono, luego presiona Detener. Puedes reproducir o descargar el audio.
+      </div>
       <div className="mb-6 flex justify-center">
-        <div className="mb-2 rounded-xl bg-gradient-to-r from-primary/5 to-secondary/30 p-3 text-xs text-muted-foreground">
-          💡 <strong>Cómo usar:</strong> Presiona <strong>Empezar a grabar</strong>, habla al micrófono, luego presiona Detener. Puedes reproducir o descargar el audio.
-        </div>
         <div className={`flex h-32 w-32 items-center justify-center rounded-full${recording ? 'bg-red-100 animate-pulse' : 'bg-secondary'}`}>
           <Mic className={`h-12 w-12 ${recording ? 'text-red-500' : 'text-muted-foreground'}`} />
         </div>
