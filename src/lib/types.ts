@@ -1,0 +1,44 @@
+export type Locale = 'en' | 'es' | 'pt';
+
+export type TranslationDict = {
+  siteTitle: string;
+  siteTagline: string;
+  home: string;
+  language: string;
+  allRightsReserved: string;
+  // Tools
+  wheelOfNames: string;
+  triviaGen: string;
+  voiceRecorder: string;
+  essayTyper: string;
+  // Wheel
+  addNames: string;
+  spin: string;
+  winner: string;
+  resetWheel: string;
+  enterName: string;
+  // Trivia
+  category: string;
+  difficulty: string;
+  question: string;
+  showAnswer: string;
+  nextQuestion: string;
+  all: string;
+  easy: string;
+  medium: string;
+  hard: string;
+  // Voice
+  startRecording: string;
+  stopRecording: string;
+  recording: string;
+  playRecording: string;
+  downloadRecording: string;
+  noRecording: string;
+  // Essay
+  topic: string;
+  generateText: string;
+  result: string;
+  copyText: string;
+  wordCount: string;
+  generateMore: string;
+};
