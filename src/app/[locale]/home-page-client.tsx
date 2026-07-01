@@ -221,6 +221,7 @@ function TriviaGen({ dict, locale }: { dict: any; locale: string }) {
       </div>
 
       {question && (
+        <>
         <div className="mb-2 rounded-xl bg-gradient-to-r from-primary/5 to-secondary/30 p-3 text-xs text-muted-foreground">
           💡 <strong>Cómo usar:</strong> Elige la dificultad, lee la pregunta y toca <strong>Mostrar respuesta</strong> para verificar.
         </div>
@@ -241,6 +242,7 @@ function TriviaGen({ dict, locale }: { dict: any; locale: string }) {
             </div>
           )}
         </div>
+        </>
       )}
     </div>
   );
