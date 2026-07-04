@@ -11,6 +11,8 @@ export type TranslationDict = {
   triviaGen: string;
   voiceRecorder: string;
   essayTyper: string;
+  diceRoller: string;
+  coinFlip: string;
   // Wheel
   addNames: string;
   spin: string;
@@ -41,4 +43,14 @@ export type TranslationDict = {
   copyText: string;
   wordCount: string;
   generateMore: string;
+  // Dice
+  rollDice: string;
+  total: string;
+  // Coin
+  flipCoin: string;
+  flip: string;
+  heads: string;
+  tails: string;
+  headsCount: string;
+  tailsCount: string;
 };

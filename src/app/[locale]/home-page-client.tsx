@@ -3,7 +3,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { isValidLocale, getDictionary } from '@/lib/i18n';
 import type { Locale } from '@/lib/types';
-import { Shuffle, HelpCircle, Mic, FileText, Copy, Check, Play, Download, RotateCcw, Plus, Trash2 } from 'lucide-react';
+import { Shuffle, HelpCircle, Mic, FileText, Dice5, DollarSign, Copy, Check, Play, Download, RotateCcw, Plus, Trash2 } from 'lucide-react';
 
 const triviaData = {
   es: [
@@ -66,7 +66,7 @@ export default function SorteosPage() {
   const locale = params.locale as string;
   if (!isValidLocale(locale)) return null;
   const dict = getDictionary(locale as Locale);
-  const [tab, setTab] = useState<'wheel' | 'trivia' | 'voice' | 'essay'>('wheel');
+  const [tab, setTab] = useState<'wheel' | 'trivia' | 'voice' | 'essay' | 'dice' | 'coin'>('wheel');
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
@@ -84,6 +84,8 @@ export default function SorteosPage() {
           { key: 'trivia', label: dict.triviaGen, icon: HelpCircle },
           { key: 'voice', label: dict.voiceRecorder, icon: Mic },
           { key: 'essay', label: dict.essayTyper, icon: FileText },
+          { key: 'dice', label: dict.diceRoller, icon: Dice5 },
+          { key: 'coin', label: dict.coinFlip, icon: DollarSign },
         ].map(({ key, label, icon: Icon }) => (
           <button key={key} onClick={() => setTab(key as typeof tab)}
             className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium transition-all ${tab === key ? 'bg-primary text-primary-foreground shadow-md' : 'bg-card text-foreground hover:bg-secondary border border-border'}`}>
@@ -98,11 +100,15 @@ export default function SorteosPage() {
         {tab === 'trivia' && <span>💡 <strong>{dict.category}:</strong> {locale === 'pt' ? 'Escolha a dificuldade, leia a pergunta e clique em' : locale === 'en' ? 'Choose difficulty, read the question and click' : 'Elige la dificultad, lee la pregunta y toca'} <strong>{dict.showAnswer}</strong> {locale === 'pt' ? 'para verificar.' : locale === 'en' ? 'to check.' : 'para verificar.'}</span>}
         {tab === 'voice' && <span>💡 <strong>{dict.voiceRecorder}:</strong> {locale === 'pt' ? 'Pressione' : locale === 'en' ? 'Press' : 'Presiona'} <strong>{dict.startRecording}</strong>, {locale === 'pt' ? 'fale ao microfone e pressione' : locale === 'en' ? 'speak into the mic and press' : 'habla al micrófono, luego presiona'} {dict.stopRecording}. {locale === 'pt' ? 'Você pode ouvir ou baixar o áudio.' : locale === 'en' ? 'You can play or download the audio.' : 'Puedes reproducir o descargar el audio.'}</span>}
         {tab === 'essay' && <span>💡 <strong>{dict.topic}:</strong> {locale === 'pt' ? 'Escreva um tema e pressione' : locale === 'en' ? 'Write a topic and press' : 'Escribe un tema y presiona'} <strong>{dict.generateText}</strong>.</span>}
+        {tab === 'dice' && <span>💡 <strong>{dict.diceRoller}:</strong> {locale === 'pt' ? 'Escolha quantos dados e clique em' : locale === 'en' ? 'Choose how many dice and click' : 'Elige cuántos dados y haz clic en'} <strong>{dict.rollDice}</strong> {locale === 'pt' ? 'para rolá-los.' : locale === 'en' ? 'to roll them.' : 'para lanzarlos.'}</span>}
+        {tab === 'coin' && <span>💡 <strong>{dict.flipCoin}:</strong> {locale === 'pt' ? 'Clique na moeda ou no botão' : locale === 'en' ? 'Click the coin or the' : 'Haz clic en la moneda o en'} <strong>{dict.flip}</strong> {locale === 'pt' ? 'para jogar.' : locale === 'en' ? 'button to flip.' : 'para lanzar.'}</span>}
       </div>
       {tab === 'wheel' && <WheelOfNames dict={dict} />}
       {tab === 'trivia' && <TriviaGen dict={dict} locale={locale} />}
       {tab === 'voice' && <VoiceRecorder dict={dict} />}
       {tab === 'essay' && <EssayTyper dict={dict} locale={locale} />}
+      {tab === 'dice' && <DiceRoller dict={dict} />}
+      {tab === 'coin' && <CoinFlip dict={dict} />}
     </div>
   );
 }
@@ -362,6 +368,152 @@ function EssayTyper({ dict, locale }: { dict: any; locale: string }) {
           <div className="whitespace-pre-wrap leading-relaxed text-foreground">{text}</div>
         </div>
       )}
+    </div>
+  );
+}
+
+function DiceRoller({ dict }: { dict: any }) {
+  const [diceCount, setDiceCount] = useState(1);
+  const [values, setValues] = useState<number[]>([1]);
+  const [rolling, setRolling] = useState(false);
+
+  const roll = () => {
+    if (rolling) return;
+    setRolling(true);
+    // Animate through random values
+    let count = 0;
+    const interval = setInterval(() => {
+      const newValues = Array.from({ length: diceCount }, () => Math.floor(Math.random() * 6) + 1);
+      setValues(newValues);
+      count++;
+      if (count >= 8) {
+        clearInterval(interval);
+        setRolling(false);
+      }
+    }, 80);
+  };
+
+  const diceFaces: Record<number, JSX.Element> = {
+    1: <><circle cx="50" cy="50" r="6" fill="currentColor" /></>,
+    2: <><circle cx="30" cy="30" r="6" fill="currentColor" /><circle cx="70" cy="70" r="6" fill="currentColor" /></>,
+    3: <><circle cx="30" cy="30" r="6" fill="currentColor" /><circle cx="50" cy="50" r="6" fill="currentColor" /><circle cx="70" cy="70" r="6" fill="currentColor" /></>,
+    4: <><circle cx="30" cy="30" r="6" fill="currentColor" /><circle cx="70" cy="30" r="6" fill="currentColor" /><circle cx="30" cy="70" r="6" fill="currentColor" /><circle cx="70" cy="70" r="6" fill="currentColor" /></>,
+    5: <><circle cx="30" cy="30" r="6" fill="currentColor" /><circle cx="70" cy="30" r="6" fill="currentColor" /><circle cx="50" cy="50" r="6" fill="currentColor" /><circle cx="30" cy="70" r="6" fill="currentColor" /><circle cx="70" cy="70" r="6" fill="currentColor" /></>,
+    6: <><circle cx="30" cy="25" r="6" fill="currentColor" /><circle cx="70" cy="25" r="6" fill="currentColor" /><circle cx="30" cy="50" r="6" fill="currentColor" /><circle cx="70" cy="50" r="6" fill="currentColor" /><circle cx="30" cy="75" r="6" fill="currentColor" /><circle cx="70" cy="75" r="6" fill="currentColor" /></>,
+  };
+
+  const total = values.reduce((a, b) => a + b, 0);
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-6">
+      <div className="flex flex-col items-center gap-6">
+        {/* Dice count selector */}
+        <div className="flex items-center gap-3">
+          <button onClick={() => setDiceCount(Math.max(1, diceCount - 1))} className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary text-lg font-bold hover:bg-secondary/80">-</button>
+          <span className="min-w-[2rem] text-center text-lg font-semibold">{diceCount}</span>
+          <button onClick={() => setDiceCount(Math.min(6, diceCount + 1))} className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary text-lg font-bold hover:bg-secondary/80">+</button>
+        </div>
+
+        {/* Dice display */}
+        <div className="flex flex-wrap justify-center gap-3">
+          {values.map((val, i) => (
+            <div key={i} className={`flex h-20 w-20 items-center justify-center rounded-xl border-2 shadow-md transition-transform ${rolling ? 'animate-bounce' : ''}`}
+              style={{ borderColor: '#e2e8f0', background: 'white', color: '#1a202c' }}>
+              <svg viewBox="0 0 100 100" className="h-16 w-16">
+                {diceFaces[val]}
+              </svg>
+            </div>
+          ))}
+        </div>
+
+        {/* Total */}
+        {diceCount > 1 && !rolling && (
+          <p className="text-lg font-semibold text-muted-foreground">{dict.total}: <span className="text-foreground">{total}</span></p>
+        )}
+
+        {/* Roll button */}
+        <button onClick={roll} disabled={rolling}
+          className={`flex items-center gap-2 rounded-xl px-8 py-3 text-sm font-semibold ${rolling ? 'bg-muted text-muted-foreground' : 'bg-primary text-primary-foreground hover:bg-primary/90'}`}>
+          <Dice5 className="h-5 w-5" /> {dict.rollDice}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function CoinFlip({ dict }: { dict: any }) {
+  const [result, setResult] = useState<'heads' | 'tails' | null>(null);
+  const [flipping, setFlipping] = useState(false);
+  const [history, setHistory] = useState<('heads' | 'tails')[]>([]);
+
+  const flip = () => {
+    if (flipping) return;
+    setFlipping(true);
+    setResult(null);
+    const outcome = Math.random() < 0.5 ? 'heads' : 'tails';
+    setTimeout(() => {
+      setResult(outcome);
+      setFlipping(false);
+      setHistory(prev => [outcome, ...prev]);
+    }, 1200);
+  };
+
+  const headsCount = history.filter(r => r === 'heads').length;
+  const tailsCount = history.filter(r => r === 'tails').length;
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-6 text-center">
+      <div className="flex flex-col items-center gap-6">
+        {/* Coin */}
+        <div
+          onClick={flip}
+          className={`relative flex h-40 w-40 cursor-pointer items-center justify-center rounded-full border-4 shadow-xl transition-all duration-700 ${flipping ? 'animate-spin' : 'hover:shadow-2xl'}`}
+          style={{
+            background: flipping
+              ? 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)'
+              : result === 'heads'
+                ? 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)'
+                : result === 'tails'
+                  ? 'linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%)'
+                  : 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
+            borderColor: flipping ? '#d4a354' : result === 'heads' ? '#e8b84b' : result === 'tails' ? '#5b4a9e' : '#d4a354',
+          }}
+        >
+          <span className="text-4xl font-bold text-white drop-shadow-md select-none">
+            {flipping ? '?' : result === null ? dict.flip : result === 'heads' ? dict.heads : dict.tails}
+          </span>
+        </div>
+
+        {/* Last result */}
+        {result && !flipping && (
+          <p className="text-lg font-semibold">
+            {result === 'heads' ? '🪙 ' : '🪙 '}{result === 'heads' ? dict.heads : dict.tails}!
+          </p>
+        )}
+
+        {/* Flip button */}
+        <button onClick={flip} disabled={flipping}
+          className={`flex items-center gap-2 rounded-xl px-8 py-3 text-sm font-semibold ${flipping ? 'bg-muted text-muted-foreground' : 'bg-primary text-primary-foreground hover:bg-primary/90'}`}>
+          <RotateCcw className={`h-4 w-4 ${flipping ? 'animate-spin' : ''}`} /> {dict.flip}
+        </button>
+
+        {/* Stats */}
+        {history.length > 0 && (
+          <div className="w-full pt-4 border-t border-border">
+            <div className="flex justify-center gap-8 text-sm">
+              <span className="flex items-center gap-2">
+                <span className="inline-block h-3 w-3 rounded-full" style={{ background: '#f6d365' }}></span>
+                {dict.headsCount}: {headsCount}
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="inline-block h-3 w-3 rounded-full" style={{ background: '#5b4a9e' }}></span>
+                {dict.tailsCount}: {tailsCount}
+              </span>
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">{history.length} {dict.total}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
