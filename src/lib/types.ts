@@ -45,7 +45,16 @@ export type TranslationDict = {
   generateMore: string;
   // Dice
   rollDice: string;
+  roll: string;
   total: string;
+  totalRolls: string;
+  selectDice: string;
+  oneDie: string;
+  twoDice: string;
+  normal: string;
+  d20: string;
+  history: string;
+  clearHistory: string;
   // Coin
   flipCoin: string;
   flip: string;

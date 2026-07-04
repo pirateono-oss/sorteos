@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { isValidLocale, getDictionary } from '@/lib/i18n';
 import type { Locale } from '@/lib/types';
@@ -100,7 +100,7 @@ export default function SorteosPage() {
         {tab === 'trivia' && <span>💡 <strong>{dict.category}:</strong> {locale === 'pt' ? 'Escolha a dificuldade, leia a pergunta e clique em' : locale === 'en' ? 'Choose difficulty, read the question and click' : 'Elige la dificultad, lee la pregunta y toca'} <strong>{dict.showAnswer}</strong> {locale === 'pt' ? 'para verificar.' : locale === 'en' ? 'to check.' : 'para verificar.'}</span>}
         {tab === 'voice' && <span>💡 <strong>{dict.voiceRecorder}:</strong> {locale === 'pt' ? 'Pressione' : locale === 'en' ? 'Press' : 'Presiona'} <strong>{dict.startRecording}</strong>, {locale === 'pt' ? 'fale ao microfone e pressione' : locale === 'en' ? 'speak into the mic and press' : 'habla al micrófono, luego presiona'} {dict.stopRecording}. {locale === 'pt' ? 'Você pode ouvir ou baixar o áudio.' : locale === 'en' ? 'You can play or download the audio.' : 'Puedes reproducir o descargar el audio.'}</span>}
         {tab === 'essay' && <span>💡 <strong>{dict.topic}:</strong> {locale === 'pt' ? 'Escreva um tema e pressione' : locale === 'en' ? 'Write a topic and press' : 'Escribe un tema y presiona'} <strong>{dict.generateText}</strong>.</span>}
-        {tab === 'dice' && <span>💡 <strong>{dict.diceRoller}:</strong> {locale === 'pt' ? 'Escolha quantos dados e clique em' : locale === 'en' ? 'Choose how many dice and click' : 'Elige cuántos dados y haz clic en'} <strong>{dict.rollDice}</strong> {locale === 'pt' ? 'para rolá-los.' : locale === 'en' ? 'to roll them.' : 'para lanzarlos.'}</span>}
+        {tab === 'dice' && <span>💡 <strong>{dict.diceRoller}:</strong> {locale === 'pt' ? 'Escolha entre dados normais ou D20 e clique em' : locale === 'en' ? 'Choose normal dice or D20 and click' : 'Elige entre dados normales o D20 y haz clic en'} <strong>{dict.roll}</strong> {locale === 'pt' ? 'para rolá-los.' : locale === 'en' ? 'to roll them.' : 'para lanzarlos.'}</span>}
         {tab === 'coin' && <span>💡 <strong>{dict.flipCoin}:</strong> {locale === 'pt' ? 'Clique na moeda ou no botão' : locale === 'en' ? 'Click the coin or the' : 'Haz clic en la moneda o en'} <strong>{dict.flip}</strong> {locale === 'pt' ? 'para jogar.' : locale === 'en' ? 'button to flip.' : 'para lanzar.'}</span>}
       </div>
       {tab === 'wheel' && <WheelOfNames dict={dict} />}
@@ -373,27 +373,41 @@ function EssayTyper({ dict, locale }: { dict: any; locale: string }) {
 }
 
 function DiceRoller({ dict }: { dict: any }) {
+  const [mode, setMode] = useState<'normal' | 'd20'>('normal');
   const [diceCount, setDiceCount] = useState(1);
   const [values, setValues] = useState<number[]>([1]);
   const [rolling, setRolling] = useState(false);
+  const [history, setHistory] = useState<{ values: number[]; total: number; timestamp: number }[]>([]);
+  const [rotation, setRotation] = useState(0);
 
   const roll = () => {
     if (rolling) return;
     setRolling(true);
-    // Animate through random values
+    setRotation(prev => prev + 720 + Math.floor(Math.random() * 360));
+    
     let count = 0;
     const interval = setInterval(() => {
-      const newValues = Array.from({ length: diceCount }, () => Math.floor(Math.random() * 6) + 1);
-      setValues(newValues);
+      if (mode === 'd20') {
+        setValues([Math.floor(Math.random() * 20) + 1]);
+      } else {
+        const newValues = Array.from({ length: diceCount }, () => Math.floor(Math.random() * 6) + 1);
+        setValues(newValues);
+      }
       count++;
       if (count >= 8) {
         clearInterval(interval);
         setRolling(false);
+        const finalValues = mode === 'd20'
+          ? [Math.floor(Math.random() * 20) + 1]
+          : Array.from({ length: diceCount }, () => Math.floor(Math.random() * 6) + 1);
+        setValues(finalValues);
+        const total = finalValues.reduce((a, b) => a + b, 0);
+        setHistory(prev => [{ values: finalValues, total, timestamp: Date.now() }, ...prev].slice(0, 10));
       }
     }, 80);
   };
 
-  const diceFaces: Record<number, JSX.Element> = {
+  const diceFaces: Record<number, React.ReactNode> = {
     1: <><circle cx="50" cy="50" r="6" fill="currentColor" /></>,
     2: <><circle cx="30" cy="30" r="6" fill="currentColor" /><circle cx="70" cy="70" r="6" fill="currentColor" /></>,
     3: <><circle cx="30" cy="30" r="6" fill="currentColor" /><circle cx="50" cy="50" r="6" fill="currentColor" /><circle cx="70" cy="70" r="6" fill="currentColor" /></>,
@@ -407,35 +421,88 @@ function DiceRoller({ dict }: { dict: any }) {
   return (
     <div className="rounded-xl border border-border bg-card p-6">
       <div className="flex flex-col items-center gap-6">
-        {/* Dice count selector */}
-        <div className="flex items-center gap-3">
-          <button onClick={() => setDiceCount(Math.max(1, diceCount - 1))} className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary text-lg font-bold hover:bg-secondary/80">-</button>
-          <span className="min-w-[2rem] text-center text-lg font-semibold">{diceCount}</span>
-          <button onClick={() => setDiceCount(Math.min(6, diceCount + 1))} className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary text-lg font-bold hover:bg-secondary/80">+</button>
+        {/* Mode selector */}
+        <div className="flex items-center gap-2">
+          <button onClick={() => { if (!rolling) { setMode('normal'); setValues([1]); } }}
+            className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition-all ${mode === 'normal' ? 'bg-primary text-primary-foreground shadow-md' : 'bg-secondary text-foreground hover:bg-secondary/80'}`}>
+            {dict.normal}
+          </button>
+          <button onClick={() => { if (!rolling) { setMode('d20'); setValues([1]); } }}
+            className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition-all ${mode === 'd20' ? 'bg-primary text-primary-foreground shadow-md' : 'bg-secondary text-foreground hover:bg-secondary/80'}`}>
+            {dict.d20}
+          </button>
         </div>
 
-        {/* Dice display */}
-        <div className="flex flex-wrap justify-center gap-3">
+        {/* Dice count selector (only for normal mode) */}
+        {mode === 'normal' && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">{dict.selectDice}:</span>
+            {[1, 2, 3, 4, 5, 6].map(n => (
+              <button key={n} onClick={() => { if (!rolling) { setDiceCount(n); setValues(Array(n).fill(1)); } }}
+                className={`flex h-9 w-9 items-center justify-center rounded-lg text-sm font-semibold transition-all ${diceCount === n ? 'bg-primary text-primary-foreground shadow-md' : 'bg-secondary text-foreground hover:bg-secondary/80'}`}>
+                {n}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Dice display with 3D rotation */}
+        <div className="flex flex-wrap justify-center gap-3 perspective-500">
           {values.map((val, i) => (
-            <div key={i} className={`flex h-20 w-20 items-center justify-center rounded-xl border-2 shadow-md transition-transform ${rolling ? 'animate-bounce' : ''}`}
-              style={{ borderColor: '#e2e8f0', background: 'white', color: '#1a202c' }}>
-              <svg viewBox="0 0 100 100" className="h-16 w-16">
-                {diceFaces[val]}
-              </svg>
+            <div key={i}
+              className="flex h-20 w-20 items-center justify-center rounded-xl border-2 shadow-lg transition-transform duration-200"
+              style={{
+                borderColor: '#e2e8f0',
+                background: 'linear-gradient(145deg, #ffffff, #e6e6e6)',
+                color: '#1a202c',
+                transform: rolling ? `rotateY(${rotation}deg) rotateX(${rotation * 0.3}deg)` : 'rotateY(0deg) rotateX(0deg)',
+                transition: 'transform 1s cubic-bezier(0.17, 0.67, 0.12, 0.99)',
+                boxShadow: rolling
+                  ? '0 8px 32px rgba(0,0,0,0.2), inset 0 -2px 4px rgba(0,0,0,0.1)'
+                  : '0 4px 12px rgba(0,0,0,0.1), inset 0 -1px 2px rgba(0,0,0,0.05)',
+              }}>
+              {mode === 'd20' ? (
+                <span className="text-2xl font-bold text-amber-700">{val}</span>
+              ) : (
+                <svg viewBox="0 0 100 100" className="h-16 w-16">
+                  {diceFaces[val]}
+                </svg>
+              )}
             </div>
           ))}
         </div>
 
         {/* Total */}
-        {diceCount > 1 && !rolling && (
+        {(mode === 'd20' || diceCount > 1) && !rolling && (
           <p className="text-lg font-semibold text-muted-foreground">{dict.total}: <span className="text-foreground">{total}</span></p>
         )}
 
         {/* Roll button */}
         <button onClick={roll} disabled={rolling}
           className={`flex items-center gap-2 rounded-xl px-8 py-3 text-sm font-semibold ${rolling ? 'bg-muted text-muted-foreground' : 'bg-primary text-primary-foreground hover:bg-primary/90'}`}>
-          <Dice5 className="h-5 w-5" /> {dict.rollDice}
+          <Dice5 className={`h-5 w-5 ${rolling ? 'animate-spin' : ''}`} /> {rolling ? '...' : dict.roll}
         </button>
+
+        {/* History */}
+        {history.length > 0 && (
+          <div className="w-full border-t border-border pt-4">
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-sm font-medium text-muted-foreground">{dict.history} ({history.length})</p>
+              <button onClick={() => setHistory([])}
+                className="flex items-center gap-1 rounded-lg bg-secondary px-3 py-1 text-xs hover:bg-secondary/80">
+                <Trash2 className="h-3 w-3" /> {dict.clearHistory}
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {history.map((h, i) => (
+                <span key={i} title={h.values.join(' + ') + ' = ' + h.total}
+                  className="inline-flex h-8 items-center gap-1 rounded-lg bg-secondary px-2.5 text-xs font-medium text-foreground">
+                  {h.values.length > 1 ? `${h.total}` : h.values[0]}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -487,7 +554,7 @@ function CoinFlip({ dict }: { dict: any }) {
         {/* Last result */}
         {result && !flipping && (
           <p className="text-lg font-semibold">
-            {result === 'heads' ? '🪙 ' : '🪙 '}{result === 'heads' ? dict.heads : dict.tails}!
+            🪙 {result === 'heads' ? dict.heads : dict.tails}!
           </p>
         )}
 
@@ -497,9 +564,16 @@ function CoinFlip({ dict }: { dict: any }) {
           <RotateCcw className={`h-4 w-4 ${flipping ? 'animate-spin' : ''}`} /> {dict.flip}
         </button>
 
-        {/* Stats */}
+        {/* Stats & History */}
         {history.length > 0 && (
-          <div className="w-full pt-4 border-t border-border">
+          <div className="w-full border-t border-border pt-4">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-sm font-medium text-muted-foreground">{dict.history} ({history.length})</p>
+              <button onClick={() => setHistory([])}
+                className="flex items-center gap-1 rounded-lg bg-secondary px-3 py-1 text-xs hover:bg-secondary/80">
+                <Trash2 className="h-3 w-3" /> {dict.clearHistory}
+              </button>
+            </div>
             <div className="flex justify-center gap-8 text-sm">
               <span className="flex items-center gap-2">
                 <span className="inline-block h-3 w-3 rounded-full" style={{ background: '#f6d365' }}></span>
@@ -510,7 +584,20 @@ function CoinFlip({ dict }: { dict: any }) {
                 {dict.tailsCount}: {tailsCount}
               </span>
             </div>
-            <p className="mt-2 text-xs text-muted-foreground">{history.length} {dict.total}</p>
+            {/* Last 10 flips */}
+            <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+              {history.slice(0, 10).map((r, i) => (
+                <span key={i}
+                  className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${
+                    r === 'heads'
+                      ? 'bg-amber-100 text-amber-800'
+                      : 'bg-indigo-100 text-indigo-800'
+                  }`}
+                  title={r === 'heads' ? dict.heads : dict.tails}>
+                  {r === 'heads' ? 'H' : 'T'}
+                </span>
+              ))}
+            </div>
           </div>
         )}
       </div>
